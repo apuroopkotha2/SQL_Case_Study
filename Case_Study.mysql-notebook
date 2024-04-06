@@ -1,0 +1,2121 @@
+{
+    "type": "MySQLNotebook",
+    "version": "1.0",
+    "caption": "DB Notebook",
+    "content": "\\about\nselect * from Products\nselect * from Reviews\nselect a.name, b.product_id, avg(rating) as avg_rating\nfrom Products a\njoin Reviews b on a.product_id = b.product_id\ngroup by a.name, b.product_id\nhaving avg(rating) >= 5\nselect a.name, b.product_id, avg(b.rating) as avg_rating\nfrom Products a\njoin Reviews b on a.product_id = b.product_id\ngroup by a.name, b.product_id\nhaving count(*) > 1\nselect * from Customers\nselect * from Order_Items\nselect * from Orders\nselect a.name, a.customer_id, sum(b.total_amount) as total_amount \nfrom Customers a \njoin Orders b \non a.customer_id = b.customer_id \nwhere b.total_amount > 100 \ngroup by a.name, a.customer_id \norder by total_amount desc \nlimit 1; \n# Level 2 \nselect \nsum(case when first_order_count > 1 then 1 else 0 end) as repeated_customers,\ncount(*) as total_num_customers, \nSUM(CASE WHEN first_order_count > 1 THEN 1 ELSE 0 END) / COUNT(*) * 100 AS retention_percentage\nfrom\n(select a.customer_id, count(*) as first_order_count \nfrom orders a \njoin Customers b \non a.customer_id = b.customer_id\ngroup by a.customer_id \nhaving MIN(a.order_date) <= DATE_ADD(Min(a.order_date), Interval 90 DAY) \n) as first_orders;\nselect a.customer_id, count(*) as first_order_count \nfrom orders a \njoin Customers b \non a.customer_id = b.customer_id\ngroup by a.customer_id \nhaving MIN(a.order_date) <= DATE_ADD(Min(a.order_date), Interval 90 DAY) \nselect * from Customers\nselect * from Order_Items\nselect a.customer_id, count(*) as first_order_count \nfrom orders a \njoin Customers b \non a.customer_id = b.customer_id\ngroup by a.customer_id \nhaving MIN(a.order_date) <= DATE_ADD((SELECT join_date FROM Customers WHERE customer_id = a.customer_id), INTERVAL 90 DAY)\nselect b.customer_id, (count(distinct(b.customer_id)) / count(*)) as Percentage_of_Customers \nfrom orders a \njoin Customers b \non a.customer_id = b.customer_id\nwhere b.join_date < '2023-04-08'\ngroup by a.customer_id \nhaving MIN(a.order_date) <= DATE_ADD(Min(a.order_date), Interval 90 DAY) \nselect * from Orders\nselect * from Customers\nselect a.customer_id, count(*) as first_order_count \nfrom orders a \njoin Customers b \non a.customer_id = b.customer_id\ngroup by a.customer_id \nhaving MIN(a.order_date) <= DATE_ADD((SELECT join_date FROM Customers WHERE customer_id = a.customer_id), INTERVAL 90 DAY)\nselect\nb.category, \nmonth(c.order_date) as month, \nround((sum(c.total_amount) - lag(sum(c.total_amount),1)over(partition by b.category order by month(c.order_date))/lag(sum(c.total_amount),1)over(partition by b.Category order by month(c.order_date))) *100) as MoM\nfrom Order_Items a \njoin Products b \non a.product_id = b.product_id \njoin Orders c\non a.order_id = c.order_id\ngroup by b.category, month(c.order_date)\nselect\nb.category, month(c.order_date) as month, SUM(a.quantity * a.unit_price) AS total_revenue\nfrom Order_Items a \njoin Products b \non a.product_id = b.product_id \njoin Orders c\non a.order_id = c.order_id\ngroup by b.category, month(c.order_date)\nselect\ncategory, month, \nconcat((round(((sum(total_revenue) - lag(sum(total_revenue),1)over(partition by category order by month))/lag(sum(total_revenue),1)over(partition by category order by month)) *100)),'%') as MoM\nfrom\n(select\nb.category, month(c.order_date) as month, SUM(a.quantity * a.unit_price) AS total_revenue\nfrom Order_Items a \njoin Products b \non a.product_id = b.product_id \njoin Orders c\non a.order_id = c.order_id\ngroup by b.category, month(c.order_date)) as rev_table\ngroup by category, month\nselect\nb.category, month(c.order_date) as month, SUM(a.quantity * a.unit_price) AS total_revenue\nfrom Order_Items a \njoin Products b \non a.product_id = b.product_id \njoin Orders c\non a.order_id = c.order_id\ngroup by b.category, month(c.order_date)\nselect month(order_date) as month, avg(total_amount) as avg_order_value\nfrom Orders\nwhere total_amount >100 and order_date >= '2023-01-01' and order_date <= '2023-04-01'\ngroup by month(order_date)\n\nselect month(order_date) as month, avg(total_amount) as avg_order_value\nfrom Orders\nwhere total_amount >100 \ngroup by month(order_date)\nhaving Max(order_date) > DATE_ADD('2023-04-01', Interval -20 DAY) \n",
+    "options": {
+        "tabSize": 4,
+        "indentSize": 4,
+        "insertSpaces": true,
+        "defaultEOL": "LF",
+        "trimAutoWhitespace": true
+    },
+    "viewState": {
+        "cursorState": [
+            {
+                "inSelectionMode": false,
+                "selectionStart": {
+                    "lineNumber": 116,
+                    "column": 1
+                },
+                "position": {
+                    "lineNumber": 116,
+                    "column": 1
+                }
+            }
+        ],
+        "viewState": {
+            "scrollLeft": 0,
+            "firstPosition": {
+                "lineNumber": 104,
+                "column": 1
+            },
+            "firstPositionDeltaTop": -22
+        },
+        "contributionsState": {
+            "editor.contrib.folding": {},
+            "editor.contrib.wordHighlighter": false
+        }
+    },
+    "contexts": [
+        {
+            "state": {
+                "start": 1,
+                "end": 1,
+                "language": "mysql",
+                "result": {
+                    "type": "text",
+                    "text": [
+                        {
+                            "type": 2,
+                            "content": "Welcome to the MySQL Shell - DB Notebook.\n\nPress Cmd+Enter to execute the code block.\n\nExecute \\sql to switch to SQL, \\js to JavaScript and \\ts to TypeScript mode.\nExecute \\help or \\? for help;",
+                            "language": "ansi"
+                        }
+                    ]
+                },
+                "currentHeight": 104,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 6
+                        },
+                        "contentStart": 0,
+                        "state": 0
+                    }
+                ]
+            },
+            "data": []
+        },
+        {
+            "state": {
+                "start": 2,
+                "end": 2,
+                "language": "mysql",
+                "result": {
+                    "type": "resultIds",
+                    "list": [
+                        "a863faa3-2e80-4350-b3b3-9f6f6d516df4"
+                    ]
+                },
+                "currentHeight": 36,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 22
+                        },
+                        "contentStart": 0,
+                        "state": 3
+                    }
+                ]
+            },
+            "data": [
+                {
+                    "tabId": "b733e1e5-e913-4974-865e-2d4a6673f551",
+                    "resultId": "a863faa3-2e80-4350-b3b3-9f6f6d516df4",
+                    "rows": [
+                        {
+                            "0": 1,
+                            "1": "Laptop",
+                            "2": "Electronics",
+                            "3": "500.00"
+                        },
+                        {
+                            "0": 2,
+                            "1": "Smartphone",
+                            "2": "Electronics",
+                            "3": "300.00"
+                        },
+                        {
+                            "0": 3,
+                            "1": "Headphones",
+                            "2": "Electronics",
+                            "3": "100.00"
+                        },
+                        {
+                            "0": 4,
+                            "1": "T-shirt",
+                            "2": "Fashion",
+                            "3": "25.00"
+                        },
+                        {
+                            "0": 5,
+                            "1": "Book",
+                            "2": "Books",
+                            "3": "10.00"
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "product_id",
+                            "field": "0",
+                            "dataType": {
+                                "type": 4
+                            }
+                        },
+                        {
+                            "title": "name",
+                            "field": "1",
+                            "dataType": {
+                                "type": 17
+                            }
+                        },
+                        {
+                            "title": "category",
+                            "field": "2",
+                            "dataType": {
+                                "type": 17
+                            }
+                        },
+                        {
+                            "title": "price",
+                            "field": "3",
+                            "dataType": {
+                                "type": 10
+                            }
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 5 records retrieved in 2.354ms"
+                    },
+                    "totalRowCount": 5,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 0,
+                    "sql": "select * from Products"
+                }
+            ]
+        },
+        {
+            "state": {
+                "start": 3,
+                "end": 3,
+                "language": "mysql",
+                "result": {
+                    "type": "resultIds",
+                    "list": [
+                        "6a7bdf6b-52d1-4e4f-89cd-b2d7c4573f46"
+                    ]
+                },
+                "currentHeight": 36,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 21
+                        },
+                        "contentStart": 0,
+                        "state": 3
+                    }
+                ]
+            },
+            "data": [
+                {
+                    "tabId": "b733e1e5-e913-4974-865e-2d4a6673f551",
+                    "resultId": "6a7bdf6b-52d1-4e4f-89cd-b2d7c4573f46",
+                    "rows": [
+                        {
+                            "0": 1,
+                            "1": 1,
+                            "2": 1,
+                            "3": 5,
+                            "4": "Great product!"
+                        },
+                        {
+                            "0": 2,
+                            "1": 2,
+                            "2": 2,
+                            "3": 4,
+                            "4": "Good smartphone."
+                        },
+                        {
+                            "0": 3,
+                            "1": 3,
+                            "2": 3,
+                            "3": 3,
+                            "4": "Decent headphones."
+                        },
+                        {
+                            "0": 4,
+                            "1": 4,
+                            "2": 1,
+                            "3": 5,
+                            "4": "Love the t-shirt!"
+                        },
+                        {
+                            "0": 5,
+                            "1": 1,
+                            "2": 3,
+                            "3": 4,
+                            "4": "Fast laptop."
+                        },
+                        {
+                            "0": 6,
+                            "1": 2,
+                            "2": 1,
+                            "3": 3,
+                            "4": "Average phone."
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "review_id",
+                            "field": "0",
+                            "dataType": {
+                                "type": 4
+                            }
+                        },
+                        {
+                            "title": "product_id",
+                            "field": "1",
+                            "dataType": {
+                                "type": 4
+                            }
+                        },
+                        {
+                            "title": "customer_id",
+                            "field": "2",
+                            "dataType": {
+                                "type": 4
+                            }
+                        },
+                        {
+                            "title": "rating",
+                            "field": "3",
+                            "dataType": {
+                                "type": 4
+                            }
+                        },
+                        {
+                            "title": "review_text",
+                            "field": "4",
+                            "dataType": {
+                                "type": 17
+                            }
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 6 records retrieved in 1.089ms"
+                    },
+                    "totalRowCount": 6,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 0,
+                    "sql": "select * from Reviews"
+                }
+            ]
+        },
+        {
+            "state": {
+                "start": 4,
+                "end": 8,
+                "language": "mysql",
+                "result": {
+                    "type": "resultIds",
+                    "list": [
+                        "5b9050b4-ec68-4bf5-ea22-fd8fb70640f8"
+                    ]
+                },
+                "currentHeight": 36,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 170
+                        },
+                        "contentStart": 0,
+                        "state": 3
+                    }
+                ]
+            },
+            "data": [
+                {
+                    "tabId": "b733e1e5-e913-4974-865e-2d4a6673f551",
+                    "resultId": "5b9050b4-ec68-4bf5-ea22-fd8fb70640f8",
+                    "rows": [
+                        {
+                            "0": "T-shirt",
+                            "1": 4,
+                            "2": "5.0000"
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "name",
+                            "field": "0",
+                            "dataType": {
+                                "type": 17
+                            }
+                        },
+                        {
+                            "title": "product_id",
+                            "field": "1",
+                            "dataType": {
+                                "type": 4
+                            }
+                        },
+                        {
+                            "title": "avg_rating",
+                            "field": "2",
+                            "dataType": {
+                                "type": 10
+                            }
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 1 record retrieved in 0.926ms"
+                    },
+                    "totalRowCount": 1,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 0,
+                    "sql": "select a.name, b.product_id, avg(rating) as avg_rating\nfrom Products a\njoin Reviews b on a.product_id = b.product_id\ngroup by a.name, b.product_id\nhaving avg(rating) >= 5"
+                }
+            ]
+        },
+        {
+            "state": {
+                "start": 9,
+                "end": 13,
+                "language": "mysql",
+                "result": {
+                    "type": "resultIds",
+                    "list": [
+                        "869d3357-58a7-4ebf-9aea-902be9ba02ba"
+                    ]
+                },
+                "currentHeight": 36,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 168
+                        },
+                        "contentStart": 0,
+                        "state": 3
+                    }
+                ]
+            },
+            "data": [
+                {
+                    "tabId": "b733e1e5-e913-4974-865e-2d4a6673f551",
+                    "resultId": "869d3357-58a7-4ebf-9aea-902be9ba02ba",
+                    "rows": [
+                        {
+                            "0": "Laptop",
+                            "1": 1,
+                            "2": "4.5000"
+                        },
+                        {
+                            "0": "Smartphone",
+                            "1": 2,
+                            "2": "3.5000"
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "name",
+                            "field": "0",
+                            "dataType": {
+                                "type": 17
+                            }
+                        },
+                        {
+                            "title": "product_id",
+                            "field": "1",
+                            "dataType": {
+                                "type": 4
+                            }
+                        },
+                        {
+                            "title": "avg_rating",
+                            "field": "2",
+                            "dataType": {
+                                "type": 10
+                            }
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 2 records retrieved in 1.049ms"
+                    },
+                    "totalRowCount": 2,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 0,
+                    "sql": "select a.name, b.product_id, avg(b.rating) as avg_rating\nfrom Products a\njoin Reviews b on a.product_id = b.product_id\ngroup by a.name, b.product_id\nhaving count(*) > 1"
+                }
+            ]
+        },
+        {
+            "state": {
+                "start": 14,
+                "end": 14,
+                "language": "mysql",
+                "result": {
+                    "type": "resultIds",
+                    "list": [
+                        "1a38c100-9010-48d2-9480-b36fa434c1a9"
+                    ]
+                },
+                "currentHeight": 36,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 23
+                        },
+                        "contentStart": 0,
+                        "state": 3
+                    }
+                ]
+            },
+            "data": [
+                {
+                    "tabId": "b733e1e5-e913-4974-865e-2d4a6673f551",
+                    "resultId": "1a38c100-9010-48d2-9480-b36fa434c1a9",
+                    "rows": [
+                        {
+                            "0": 1,
+                            "1": "John Doe",
+                            "2": "john.doe@example.com",
+                            "3": "2023-01-15"
+                        },
+                        {
+                            "0": 2,
+                            "1": "Jane Smith",
+                            "2": "jane.smith@example.com",
+                            "3": "2023-02-20"
+                        },
+                        {
+                            "0": 3,
+                            "1": "Alice Lee",
+                            "2": "alice.lee@example.com",
+                            "3": "2023-03-10"
+                        },
+                        {
+                            "0": 4,
+                            "1": "Bob Brown",
+                            "2": "bob.brown@example.com",
+                            "3": "2023-04-05"
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "customer_id",
+                            "field": "0",
+                            "dataType": {
+                                "type": 4
+                            }
+                        },
+                        {
+                            "title": "name",
+                            "field": "1",
+                            "dataType": {
+                                "type": 17
+                            }
+                        },
+                        {
+                            "title": "email",
+                            "field": "2",
+                            "dataType": {
+                                "type": 17
+                            }
+                        },
+                        {
+                            "title": "join_date",
+                            "field": "3",
+                            "dataType": {
+                                "type": 28
+                            }
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 4 records retrieved in 1.379ms"
+                    },
+                    "totalRowCount": 4,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 0,
+                    "sql": "select * from Customers"
+                }
+            ]
+        },
+        {
+            "state": {
+                "start": 15,
+                "end": 15,
+                "language": "mysql",
+                "result": {
+                    "type": "resultIds",
+                    "list": [
+                        "34e6aeed-a59a-4f1b-febb-5853c058bf97"
+                    ]
+                },
+                "currentHeight": 36,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 25
+                        },
+                        "contentStart": 0,
+                        "state": 3
+                    }
+                ]
+            },
+            "data": [
+                {
+                    "tabId": "b733e1e5-e913-4974-865e-2d4a6673f551",
+                    "resultId": "34e6aeed-a59a-4f1b-febb-5853c058bf97",
+                    "rows": [
+                        {
+                            "0": 1,
+                            "1": 101,
+                            "2": 1,
+                            "3": 2,
+                            "4": "50.00"
+                        },
+                        {
+                            "0": 2,
+                            "1": 101,
+                            "2": 3,
+                            "3": 1,
+                            "4": "25.00"
+                        },
+                        {
+                            "0": 3,
+                            "1": 102,
+                            "2": 2,
+                            "3": 1,
+                            "4": "30.00"
+                        },
+                        {
+                            "0": 4,
+                            "1": 103,
+                            "2": 1,
+                            "3": 3,
+                            "4": "50.00"
+                        },
+                        {
+                            "0": 5,
+                            "1": 103,
+                            "2": 4,
+                            "3": 2,
+                            "4": "20.00"
+                        },
+                        {
+                            "0": 6,
+                            "1": 104,
+                            "2": 2,
+                            "3": 2,
+                            "4": "30.00"
+                        },
+                        {
+                            "0": 7,
+                            "1": 104,
+                            "2": 3,
+                            "3": 1,
+                            "4": "25.00"
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "order_item_id",
+                            "field": "0",
+                            "dataType": {
+                                "type": 4
+                            }
+                        },
+                        {
+                            "title": "order_id",
+                            "field": "1",
+                            "dataType": {
+                                "type": 4
+                            }
+                        },
+                        {
+                            "title": "product_id",
+                            "field": "2",
+                            "dataType": {
+                                "type": 4
+                            }
+                        },
+                        {
+                            "title": "quantity",
+                            "field": "3",
+                            "dataType": {
+                                "type": 4
+                            }
+                        },
+                        {
+                            "title": "unit_price",
+                            "field": "4",
+                            "dataType": {
+                                "type": 10
+                            }
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 7 records retrieved in 0.883ms"
+                    },
+                    "totalRowCount": 7,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 0,
+                    "sql": "select * from Order_Items"
+                }
+            ]
+        },
+        {
+            "state": {
+                "start": 16,
+                "end": 16,
+                "language": "mysql",
+                "result": {
+                    "type": "resultIds",
+                    "list": [
+                        "204d8c80-af03-4a1f-8059-bd6990a49d46"
+                    ]
+                },
+                "currentHeight": 36,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 20
+                        },
+                        "contentStart": 0,
+                        "state": 3
+                    }
+                ]
+            },
+            "data": [
+                {
+                    "tabId": "b733e1e5-e913-4974-865e-2d4a6673f551",
+                    "resultId": "204d8c80-af03-4a1f-8059-bd6990a49d46",
+                    "rows": [
+                        {
+                            "0": 101,
+                            "1": 1,
+                            "2": "2023-01-20",
+                            "3": "150.00"
+                        },
+                        {
+                            "0": 102,
+                            "1": 2,
+                            "2": "2023-02-25",
+                            "3": "75.50"
+                        },
+                        {
+                            "0": 103,
+                            "1": 3,
+                            "2": "2023-03-12",
+                            "3": "200.25"
+                        },
+                        {
+                            "0": 104,
+                            "1": 1,
+                            "2": "2023-04-08",
+                            "3": "180.75"
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "order_id",
+                            "field": "0",
+                            "dataType": {
+                                "type": 4
+                            }
+                        },
+                        {
+                            "title": "customer_id",
+                            "field": "1",
+                            "dataType": {
+                                "type": 4
+                            }
+                        },
+                        {
+                            "title": "order_date",
+                            "field": "2",
+                            "dataType": {
+                                "type": 28
+                            }
+                        },
+                        {
+                            "title": "total_amount",
+                            "field": "3",
+                            "dataType": {
+                                "type": 10
+                            }
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 4 records retrieved in 1.078ms"
+                    },
+                    "totalRowCount": 4,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 0,
+                    "sql": "select * from Orders"
+                }
+            ]
+        },
+        {
+            "state": {
+                "start": 17,
+                "end": 24,
+                "language": "mysql",
+                "result": {
+                    "type": "resultIds",
+                    "list": [
+                        "eea9ff44-c6fa-46f7-a9e3-28ed8727eeb2"
+                    ]
+                },
+                "currentHeight": 36,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 230
+                        },
+                        "contentStart": 0,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 230,
+                            "length": 1
+                        },
+                        "contentStart": 229,
+                        "state": 3
+                    }
+                ]
+            },
+            "data": [
+                {
+                    "tabId": "b733e1e5-e913-4974-865e-2d4a6673f551",
+                    "resultId": "eea9ff44-c6fa-46f7-a9e3-28ed8727eeb2",
+                    "rows": [
+                        {
+                            "0": "John Doe",
+                            "1": 1,
+                            "2": "330.75"
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "name",
+                            "field": "0",
+                            "dataType": {
+                                "type": 17
+                            }
+                        },
+                        {
+                            "title": "customer_id",
+                            "field": "1",
+                            "dataType": {
+                                "type": 4
+                            }
+                        },
+                        {
+                            "title": "total_amount",
+                            "field": "2",
+                            "dataType": {
+                                "type": 10
+                            }
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 1 record retrieved in 1.785ms"
+                    },
+                    "totalRowCount": 1,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 0,
+                    "sql": "select a.name, a.customer_id, sum(b.total_amount) as total_amount\nfrom Customers a\njoin Orders b\non a.customer_id = b.customer_id\nwhere b.total_amount > 100 \ngroup by a.name, a.customer_id\norder by total_amount desc \nlimit 1"
+                }
+            ]
+        },
+        {
+            "state": {
+                "start": 25,
+                "end": 25,
+                "language": "mysql",
+                "result": {
+                    "type": "text",
+                    "text": [
+                        {
+                            "type": 4,
+                            "index": 0,
+                            "resultId": "fca49593-e84d-46c4-ce59-7283c06dcccd",
+                            "content": "OK, 0 records retrieved in 2.025ms"
+                        }
+                    ]
+                },
+                "currentHeight": 28,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 10
+                        },
+                        "contentStart": 0,
+                        "state": 1
+                    }
+                ]
+            },
+            "data": []
+        },
+        {
+            "state": {
+                "start": 26,
+                "end": 37,
+                "language": "mysql",
+                "result": {
+                    "type": "resultIds",
+                    "list": [
+                        "41e946b5-427d-415a-cece-92c93fe40c76"
+                    ]
+                },
+                "currentHeight": 36,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 457
+                        },
+                        "contentStart": 0,
+                        "state": 0
+                    }
+                ]
+            },
+            "data": [
+                {
+                    "tabId": "b733e1e5-e913-4974-865e-2d4a6673f551",
+                    "resultId": "41e946b5-427d-415a-cece-92c93fe40c76",
+                    "rows": [
+                        {
+                            "0": "1",
+                            "1": 3,
+                            "2": "33.3333"
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "repeated_customers",
+                            "field": "0",
+                            "dataType": {
+                                "type": 10
+                            }
+                        },
+                        {
+                            "title": "total_num_customers",
+                            "field": "1",
+                            "dataType": {
+                                "type": 4
+                            }
+                        },
+                        {
+                            "title": "retention_percentage",
+                            "field": "2",
+                            "dataType": {
+                                "type": 10
+                            }
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 1 record retrieved in 2.606ms"
+                    },
+                    "totalRowCount": 1,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 0,
+                    "sql": "select \nsum(case when first_order_count > 1 then 1 else 0 end) as repeated_customers,\ncount(*) as total_num_customers, \nSUM(CASE WHEN first_order_count > 1 THEN 1 ELSE 0 END) / COUNT(*) * 100 AS retention_percentage\nfrom\n(select a.customer_id, count(*) as first_order_count \nfrom orders a \njoin Customers b \non a.customer_id = b.customer_id\ngroup by a.customer_id \nhaving MIN(a.order_date) <= DATE_ADD(Min(a.order_date), Interval 90 DAY) \n) as first_orders"
+                }
+            ]
+        },
+        {
+            "state": {
+                "start": 38,
+                "end": 43,
+                "language": "mysql",
+                "result": {
+                    "type": "resultIds",
+                    "list": [
+                        "57c06b46-2293-4497-e3a2-8a03ee138f5e"
+                    ]
+                },
+                "currentHeight": 36,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 216
+                        },
+                        "contentStart": 0,
+                        "state": 3
+                    }
+                ]
+            },
+            "data": [
+                {
+                    "tabId": "b733e1e5-e913-4974-865e-2d4a6673f551",
+                    "resultId": "57c06b46-2293-4497-e3a2-8a03ee138f5e",
+                    "rows": [
+                        {
+                            "0": 1,
+                            "1": 2
+                        },
+                        {
+                            "0": 2,
+                            "1": 1
+                        },
+                        {
+                            "0": 3,
+                            "1": 1
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "customer_id",
+                            "field": "0",
+                            "dataType": {
+                                "type": 4
+                            }
+                        },
+                        {
+                            "title": "first_order_count",
+                            "field": "1",
+                            "dataType": {
+                                "type": 4
+                            }
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 3 records retrieved in 60.607ms"
+                    },
+                    "totalRowCount": 3,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 0,
+                    "sql": "select a.customer_id, count(*) as first_order_count \nfrom orders a \njoin Customers b \non a.customer_id = b.customer_id\ngroup by a.customer_id \nhaving MIN(a.order_date) <= DATE_ADD( Min(a.order_date), Interval 90 DAY) "
+                }
+            ]
+        },
+        {
+            "state": {
+                "start": 44,
+                "end": 44,
+                "language": "mysql",
+                "result": {
+                    "type": "resultIds",
+                    "list": [
+                        "3c353f01-a980-4123-9c4e-f00d72dab06e"
+                    ]
+                },
+                "currentHeight": 36,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 23
+                        },
+                        "contentStart": 0,
+                        "state": 3
+                    }
+                ]
+            },
+            "data": [
+                {
+                    "tabId": "b733e1e5-e913-4974-865e-2d4a6673f551",
+                    "resultId": "3c353f01-a980-4123-9c4e-f00d72dab06e",
+                    "rows": [
+                        {
+                            "0": 1,
+                            "1": "John Doe",
+                            "2": "john.doe@example.com",
+                            "3": "2023-01-15"
+                        },
+                        {
+                            "0": 2,
+                            "1": "Jane Smith",
+                            "2": "jane.smith@example.com",
+                            "3": "2023-02-20"
+                        },
+                        {
+                            "0": 3,
+                            "1": "Alice Lee",
+                            "2": "alice.lee@example.com",
+                            "3": "2023-03-10"
+                        },
+                        {
+                            "0": 4,
+                            "1": "Bob Brown",
+                            "2": "bob.brown@example.com",
+                            "3": "2023-04-05"
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "customer_id",
+                            "field": "0",
+                            "dataType": {
+                                "type": 4
+                            }
+                        },
+                        {
+                            "title": "name",
+                            "field": "1",
+                            "dataType": {
+                                "type": 17
+                            }
+                        },
+                        {
+                            "title": "email",
+                            "field": "2",
+                            "dataType": {
+                                "type": 17
+                            }
+                        },
+                        {
+                            "title": "join_date",
+                            "field": "3",
+                            "dataType": {
+                                "type": 28
+                            }
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 4 records retrieved in 1.913ms"
+                    },
+                    "totalRowCount": 4,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 0,
+                    "sql": "select * from Customers"
+                }
+            ]
+        },
+        {
+            "state": {
+                "start": 45,
+                "end": 45,
+                "language": "mysql",
+                "result": {
+                    "type": "resultIds",
+                    "list": [
+                        "779235b8-976f-403d-bc12-86b2edb7954e"
+                    ]
+                },
+                "currentHeight": 36,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 25
+                        },
+                        "contentStart": 0,
+                        "state": 3
+                    }
+                ]
+            },
+            "data": [
+                {
+                    "tabId": "b733e1e5-e913-4974-865e-2d4a6673f551",
+                    "resultId": "779235b8-976f-403d-bc12-86b2edb7954e",
+                    "rows": [
+                        {
+                            "0": 1,
+                            "1": 101,
+                            "2": 1,
+                            "3": 2,
+                            "4": "50.00"
+                        },
+                        {
+                            "0": 2,
+                            "1": 101,
+                            "2": 3,
+                            "3": 1,
+                            "4": "25.00"
+                        },
+                        {
+                            "0": 3,
+                            "1": 102,
+                            "2": 2,
+                            "3": 1,
+                            "4": "30.00"
+                        },
+                        {
+                            "0": 4,
+                            "1": 103,
+                            "2": 1,
+                            "3": 3,
+                            "4": "50.00"
+                        },
+                        {
+                            "0": 5,
+                            "1": 103,
+                            "2": 4,
+                            "3": 2,
+                            "4": "20.00"
+                        },
+                        {
+                            "0": 6,
+                            "1": 104,
+                            "2": 2,
+                            "3": 2,
+                            "4": "30.00"
+                        },
+                        {
+                            "0": 7,
+                            "1": 104,
+                            "2": 3,
+                            "3": 1,
+                            "4": "25.00"
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "order_item_id",
+                            "field": "0",
+                            "dataType": {
+                                "type": 4
+                            }
+                        },
+                        {
+                            "title": "order_id",
+                            "field": "1",
+                            "dataType": {
+                                "type": 4
+                            }
+                        },
+                        {
+                            "title": "product_id",
+                            "field": "2",
+                            "dataType": {
+                                "type": 4
+                            }
+                        },
+                        {
+                            "title": "quantity",
+                            "field": "3",
+                            "dataType": {
+                                "type": 4
+                            }
+                        },
+                        {
+                            "title": "unit_price",
+                            "field": "4",
+                            "dataType": {
+                                "type": 10
+                            }
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 7 records retrieved in 0.975ms"
+                    },
+                    "totalRowCount": 7,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 0,
+                    "sql": "select * from Order_Items"
+                }
+            ]
+        },
+        {
+            "state": {
+                "start": 46,
+                "end": 51,
+                "language": "mysql",
+                "result": {
+                    "type": "resultIds",
+                    "list": [
+                        "994880bd-5057-4745-8b27-0b5f923c0c00"
+                    ]
+                },
+                "currentHeight": 36,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 265
+                        },
+                        "contentStart": 0,
+                        "state": 3
+                    }
+                ]
+            },
+            "data": [
+                {
+                    "tabId": "b733e1e5-e913-4974-865e-2d4a6673f551",
+                    "resultId": "994880bd-5057-4745-8b27-0b5f923c0c00",
+                    "rows": [
+                        {
+                            "0": 1,
+                            "1": 2
+                        },
+                        {
+                            "0": 2,
+                            "1": 1
+                        },
+                        {
+                            "0": 3,
+                            "1": 1
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "customer_id",
+                            "field": "0",
+                            "dataType": {
+                                "type": 4
+                            }
+                        },
+                        {
+                            "title": "first_order_count",
+                            "field": "1",
+                            "dataType": {
+                                "type": 4
+                            }
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 3 records retrieved in 2.211ms"
+                    },
+                    "totalRowCount": 3,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 0,
+                    "sql": "select a.customer_id, count(*) as first_order_count \nfrom orders a \njoin Customers b \non a.customer_id = b.customer_id\ngroup by a.customer_id \nhaving MIN(a.order_date) <= DATE_ADD((SELECT join_date FROM Customers WHERE customer_id = a.customer_id), INTERVAL 90 DAY)"
+                }
+            ]
+        },
+        {
+            "state": {
+                "start": 52,
+                "end": 58,
+                "language": "mysql",
+                "result": {
+                    "type": "resultIds",
+                    "list": [
+                        "ce47acbe-299f-495e-c50c-a47c08c9af1a"
+                    ]
+                },
+                "currentHeight": 36,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 290
+                        },
+                        "contentStart": 0,
+                        "state": 3
+                    }
+                ]
+            },
+            "data": [
+                {
+                    "tabId": "b733e1e5-e913-4974-865e-2d4a6673f551",
+                    "resultId": "ce47acbe-299f-495e-c50c-a47c08c9af1a",
+                    "rows": [
+                        {
+                            "0": 1,
+                            "1": "0.5000"
+                        },
+                        {
+                            "0": 2,
+                            "1": "1.0000"
+                        },
+                        {
+                            "0": 3,
+                            "1": "1.0000"
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "customer_id",
+                            "field": "0",
+                            "dataType": {
+                                "type": 4
+                            }
+                        },
+                        {
+                            "title": "Percentage_of_Customers",
+                            "field": "1",
+                            "dataType": {
+                                "type": 10
+                            }
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 3 records retrieved in 1.377ms"
+                    },
+                    "totalRowCount": 3,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 0,
+                    "sql": "select b.customer_id, (count(distinct(b.customer_id)) / count(*)) as Percentage_of_Customers \nfrom orders a \njoin Customers b \non a.customer_id = b.customer_id\nwhere b.join_date < '2023-04-08'\ngroup by a.customer_id \nhaving MIN(a.order_date) <= DATE_ADD(Min(a.order_date), Interval 90 DAY) "
+                }
+            ]
+        },
+        {
+            "state": {
+                "start": 59,
+                "end": 59,
+                "language": "mysql",
+                "result": {
+                    "type": "resultIds",
+                    "list": [
+                        "e7e1ff89-869c-4c9f-f289-fcc568bc1696"
+                    ]
+                },
+                "currentHeight": 36,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 20
+                        },
+                        "contentStart": 0,
+                        "state": 3
+                    }
+                ]
+            },
+            "data": [
+                {
+                    "tabId": "b733e1e5-e913-4974-865e-2d4a6673f551",
+                    "resultId": "e7e1ff89-869c-4c9f-f289-fcc568bc1696",
+                    "rows": [
+                        {
+                            "0": 101,
+                            "1": 1,
+                            "2": "2023-01-20",
+                            "3": "150.00"
+                        },
+                        {
+                            "0": 102,
+                            "1": 2,
+                            "2": "2023-02-25",
+                            "3": "75.50"
+                        },
+                        {
+                            "0": 103,
+                            "1": 3,
+                            "2": "2023-03-12",
+                            "3": "200.25"
+                        },
+                        {
+                            "0": 104,
+                            "1": 1,
+                            "2": "2023-04-08",
+                            "3": "180.75"
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "order_id",
+                            "field": "0",
+                            "dataType": {
+                                "type": 4
+                            }
+                        },
+                        {
+                            "title": "customer_id",
+                            "field": "1",
+                            "dataType": {
+                                "type": 4
+                            }
+                        },
+                        {
+                            "title": "order_date",
+                            "field": "2",
+                            "dataType": {
+                                "type": 28
+                            }
+                        },
+                        {
+                            "title": "total_amount",
+                            "field": "3",
+                            "dataType": {
+                                "type": 10
+                            }
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 4 records retrieved in 0.655ms"
+                    },
+                    "totalRowCount": 4,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 0,
+                    "sql": "select * from Orders"
+                }
+            ]
+        },
+        {
+            "state": {
+                "start": 60,
+                "end": 60,
+                "language": "mysql",
+                "result": {
+                    "type": "resultIds",
+                    "list": [
+                        "8a7703ec-0d54-486a-8c24-7ef3d97b8845"
+                    ]
+                },
+                "currentHeight": 36,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 23
+                        },
+                        "contentStart": 0,
+                        "state": 3
+                    }
+                ]
+            },
+            "data": [
+                {
+                    "tabId": "b733e1e5-e913-4974-865e-2d4a6673f551",
+                    "resultId": "8a7703ec-0d54-486a-8c24-7ef3d97b8845",
+                    "rows": [
+                        {
+                            "0": 1,
+                            "1": "John Doe",
+                            "2": "john.doe@example.com",
+                            "3": "2023-01-15"
+                        },
+                        {
+                            "0": 2,
+                            "1": "Jane Smith",
+                            "2": "jane.smith@example.com",
+                            "3": "2023-02-20"
+                        },
+                        {
+                            "0": 3,
+                            "1": "Alice Lee",
+                            "2": "alice.lee@example.com",
+                            "3": "2023-03-10"
+                        },
+                        {
+                            "0": 4,
+                            "1": "Bob Brown",
+                            "2": "bob.brown@example.com",
+                            "3": "2023-04-05"
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "customer_id",
+                            "field": "0",
+                            "dataType": {
+                                "type": 4
+                            }
+                        },
+                        {
+                            "title": "name",
+                            "field": "1",
+                            "dataType": {
+                                "type": 17
+                            }
+                        },
+                        {
+                            "title": "email",
+                            "field": "2",
+                            "dataType": {
+                                "type": 17
+                            }
+                        },
+                        {
+                            "title": "join_date",
+                            "field": "3",
+                            "dataType": {
+                                "type": 28
+                            }
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 4 records retrieved in 0.914ms"
+                    },
+                    "totalRowCount": 4,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 0,
+                    "sql": "select * from Customers"
+                }
+            ]
+        },
+        {
+            "state": {
+                "start": 61,
+                "end": 66,
+                "language": "mysql",
+                "result": {
+                    "type": "resultIds",
+                    "list": [
+                        "31a6d242-0839-455f-f02d-e8b48e161fcf"
+                    ]
+                },
+                "currentHeight": 36,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 265
+                        },
+                        "contentStart": 0,
+                        "state": 3
+                    }
+                ]
+            },
+            "data": [
+                {
+                    "tabId": "b733e1e5-e913-4974-865e-2d4a6673f551",
+                    "resultId": "31a6d242-0839-455f-f02d-e8b48e161fcf",
+                    "rows": [
+                        {
+                            "0": 1,
+                            "1": 2
+                        },
+                        {
+                            "0": 2,
+                            "1": 1
+                        },
+                        {
+                            "0": 3,
+                            "1": 1
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "customer_id",
+                            "field": "0",
+                            "dataType": {
+                                "type": 4
+                            }
+                        },
+                        {
+                            "title": "first_order_count",
+                            "field": "1",
+                            "dataType": {
+                                "type": 4
+                            }
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 3 records retrieved in 4.819ms"
+                    },
+                    "totalRowCount": 3,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 0,
+                    "sql": "select a.customer_id, count(*) as first_order_count \nfrom orders a \njoin Customers b \non a.customer_id = b.customer_id\ngroup by a.customer_id \nhaving MIN(a.order_date) <= DATE_ADD((SELECT join_date FROM Customers WHERE customer_id = a.customer_id), INTERVAL 90 DAY)"
+                }
+            ]
+        },
+        {
+            "state": {
+                "start": 67,
+                "end": 76,
+                "language": "mysql",
+                "result": {
+                    "type": "resultIds",
+                    "list": [
+                        "ef2f7ceb-f78b-439a-9390-efdb1fdac535"
+                    ]
+                },
+                "currentHeight": 36,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 414
+                        },
+                        "contentStart": 0,
+                        "state": 3
+                    }
+                ]
+            },
+            "data": [
+                {
+                    "tabId": "b733e1e5-e913-4974-865e-2d4a6673f551",
+                    "resultId": "ef2f7ceb-f78b-439a-9390-efdb1fdac535",
+                    "rows": [
+                        {
+                            "0": "Electronics",
+                            "1": 1,
+                            "2": null
+                        },
+                        {
+                            "0": "Electronics",
+                            "1": 2,
+                            "2": "7450"
+                        },
+                        {
+                            "0": "Electronics",
+                            "1": 3,
+                            "2": "19925"
+                        },
+                        {
+                            "0": "Electronics",
+                            "1": 4,
+                            "2": "36050"
+                        },
+                        {
+                            "0": "Fashion",
+                            "1": 3,
+                            "2": null
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "category",
+                            "field": "0",
+                            "dataType": {
+                                "type": 17
+                            }
+                        },
+                        {
+                            "title": "month",
+                            "field": "1",
+                            "dataType": {
+                                "type": 1
+                            }
+                        },
+                        {
+                            "title": "MoM",
+                            "field": "2",
+                            "dataType": {
+                                "type": 10
+                            }
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 5 records retrieved in 2.269ms"
+                    },
+                    "totalRowCount": 5,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 0,
+                    "sql": "select\nb.category, \nmonth(c.order_date) as month, \nround((sum(c.total_amount) - lag(sum(c.total_amount),1)over(partition by b.category order by month(c.order_date))/lag(sum(c.total_amount),1)over(partition by b.Category order by month(c.order_date))) *100) as MoM\nfrom Order_Items a \njoin Products b \non a.product_id = b.product_id \njoin Orders c\non a.order_id = c.order_id\ngroup by b.category, month(c.order_date)"
+                }
+            ]
+        },
+        {
+            "state": {
+                "start": 77,
+                "end": 84,
+                "language": "mysql",
+                "result": {
+                    "type": "resultIds",
+                    "list": [
+                        "6e17cec3-62ce-4085-bc0c-89595dfbfb30"
+                    ]
+                },
+                "currentHeight": 36,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 247
+                        },
+                        "contentStart": 0,
+                        "state": 3
+                    }
+                ]
+            },
+            "data": [
+                {
+                    "tabId": "b733e1e5-e913-4974-865e-2d4a6673f551",
+                    "resultId": "6e17cec3-62ce-4085-bc0c-89595dfbfb30",
+                    "rows": [
+                        {
+                            "0": "Electronics",
+                            "1": 1,
+                            "2": "125.00"
+                        },
+                        {
+                            "0": "Electronics",
+                            "1": 2,
+                            "2": "30.00"
+                        },
+                        {
+                            "0": "Electronics",
+                            "1": 3,
+                            "2": "150.00"
+                        },
+                        {
+                            "0": "Fashion",
+                            "1": 3,
+                            "2": "40.00"
+                        },
+                        {
+                            "0": "Electronics",
+                            "1": 4,
+                            "2": "85.00"
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "category",
+                            "field": "0",
+                            "dataType": {
+                                "type": 17
+                            }
+                        },
+                        {
+                            "title": "month",
+                            "field": "1",
+                            "dataType": {
+                                "type": 1
+                            }
+                        },
+                        {
+                            "title": "total_revenue",
+                            "field": "2",
+                            "dataType": {
+                                "type": 10
+                            }
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 5 records retrieved in 2.284ms"
+                    },
+                    "totalRowCount": 5,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 0,
+                    "sql": "select\nb.category, month(c.order_date) as month, SUM(a.quantity * a.unit_price) AS total_revenue\nfrom Order_Items a \njoin Products b \non a.product_id = b.product_id \njoin Orders c\non a.order_id = c.order_id\ngroup by b.category, month(c.order_date)"
+                }
+            ]
+        },
+        {
+            "state": {
+                "start": 85,
+                "end": 97,
+                "language": "mysql",
+                "result": {
+                    "type": "resultIds",
+                    "list": [
+                        "663046b2-5c15-4e56-b0db-a92f7d21a091"
+                    ]
+                },
+                "currentHeight": 169,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 511
+                        },
+                        "contentStart": 0,
+                        "state": 3
+                    }
+                ]
+            },
+            "data": [
+                {
+                    "tabId": "b733e1e5-e913-4974-865e-2d4a6673f551",
+                    "resultId": "663046b2-5c15-4e56-b0db-a92f7d21a091",
+                    "rows": [
+                        {
+                            "0": "Electronics",
+                            "1": 1,
+                            "2": null
+                        },
+                        {
+                            "0": "Electronics",
+                            "1": 2,
+                            "2": "-76%"
+                        },
+                        {
+                            "0": "Electronics",
+                            "1": 3,
+                            "2": "400%"
+                        },
+                        {
+                            "0": "Electronics",
+                            "1": 4,
+                            "2": "-43%"
+                        },
+                        {
+                            "0": "Fashion",
+                            "1": 3,
+                            "2": null
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "category",
+                            "field": "0",
+                            "dataType": {
+                                "type": 17
+                            }
+                        },
+                        {
+                            "title": "month",
+                            "field": "1",
+                            "dataType": {
+                                "type": 1
+                            }
+                        },
+                        {
+                            "title": "MoM",
+                            "field": "2",
+                            "dataType": {
+                                "type": 17
+                            }
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 5 records retrieved in 6.504ms"
+                    },
+                    "totalRowCount": 5,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 0,
+                    "sql": "select\ncategory, month, \nconcat((round(((sum(total_revenue) - lag(sum(total_revenue),1)over(partition by category order by month))/lag(sum(total_revenue),1)over(partition by category order by month)) *100)),'%') as MoM\nfrom\n(select\nb.category, month(c.order_date) as month, SUM(a.quantity * a.unit_price) AS total_revenue\nfrom Order_Items a \njoin Products b \non a.product_id = b.product_id \njoin Orders c\non a.order_id = c.order_id\ngroup by b.category, month(c.order_date)) as rev_table\ngroup by category, month"
+                }
+            ]
+        },
+        {
+            "state": {
+                "start": 98,
+                "end": 105,
+                "language": "mysql",
+                "result": {
+                    "type": "resultIds",
+                    "list": [
+                        "82d63684-50ac-4780-92b3-33bd34364e1a"
+                    ]
+                },
+                "currentHeight": 169,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 247
+                        },
+                        "contentStart": 0,
+                        "state": 3
+                    }
+                ]
+            },
+            "data": [
+                {
+                    "tabId": "b733e1e5-e913-4974-865e-2d4a6673f551",
+                    "resultId": "82d63684-50ac-4780-92b3-33bd34364e1a",
+                    "rows": [
+                        {
+                            "0": "Electronics",
+                            "1": 1,
+                            "2": "125.00"
+                        },
+                        {
+                            "0": "Electronics",
+                            "1": 2,
+                            "2": "30.00"
+                        },
+                        {
+                            "0": "Electronics",
+                            "1": 3,
+                            "2": "150.00"
+                        },
+                        {
+                            "0": "Fashion",
+                            "1": 3,
+                            "2": "40.00"
+                        },
+                        {
+                            "0": "Electronics",
+                            "1": 4,
+                            "2": "85.00"
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "category",
+                            "field": "0",
+                            "dataType": {
+                                "type": 17
+                            }
+                        },
+                        {
+                            "title": "month",
+                            "field": "1",
+                            "dataType": {
+                                "type": 1
+                            }
+                        },
+                        {
+                            "title": "total_revenue",
+                            "field": "2",
+                            "dataType": {
+                                "type": 10
+                            }
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 5 records retrieved in 2.207ms"
+                    },
+                    "totalRowCount": 5,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 0,
+                    "sql": "select\nb.category, month(c.order_date) as month, SUM(a.quantity * a.unit_price) AS total_revenue\nfrom Order_Items a \njoin Products b \non a.product_id = b.product_id \njoin Orders c\non a.order_id = c.order_id\ngroup by b.category, month(c.order_date)"
+                }
+            ]
+        },
+        {
+            "state": {
+                "start": 106,
+                "end": 109,
+                "language": "mysql",
+                "result": {
+                    "type": "resultIds",
+                    "list": [
+                        "59e1640c-f586-43d3-ebbc-953c2861ff87"
+                    ]
+                },
+                "currentHeight": 106,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 196
+                        },
+                        "contentStart": 0,
+                        "state": 3
+                    }
+                ]
+            },
+            "data": [
+                {
+                    "tabId": "b733e1e5-e913-4974-865e-2d4a6673f551",
+                    "resultId": "59e1640c-f586-43d3-ebbc-953c2861ff87",
+                    "rows": [
+                        {
+                            "0": 1,
+                            "1": "150.000000"
+                        },
+                        {
+                            "0": 3,
+                            "1": "200.250000"
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "month",
+                            "field": "0",
+                            "dataType": {
+                                "type": 1
+                            }
+                        },
+                        {
+                            "title": "avg_order_value",
+                            "field": "1",
+                            "dataType": {
+                                "type": 10
+                            }
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 2 records retrieved in 3.579ms"
+                    },
+                    "totalRowCount": 2,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 0,
+                    "sql": "select month(order_date) as month, avg(total_amount) as avg_order_value\nfrom Orders\nwhere total_amount >100 and order_date >= '2023-01-01' and order_date <= '2023-04-01'\ngroup by month(order_date)"
+                }
+            ]
+        },
+        {
+            "state": {
+                "start": 110,
+                "end": 115,
+                "language": "mysql",
+                "result": {
+                    "type": "resultIds",
+                    "list": [
+                        "3df46df8-0a88-471e-825c-3ba624286866"
+                    ]
+                },
+                "currentHeight": 85,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 203
+                        },
+                        "contentStart": 1,
+                        "state": 3
+                    }
+                ]
+            },
+            "data": [
+                {
+                    "tabId": "b733e1e5-e913-4974-865e-2d4a6673f551",
+                    "resultId": "3df46df8-0a88-471e-825c-3ba624286866",
+                    "rows": [
+                        {
+                            "0": 4,
+                            "1": "180.750000"
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "month",
+                            "field": "0",
+                            "dataType": {
+                                "type": 1
+                            }
+                        },
+                        {
+                            "title": "avg_order_value",
+                            "field": "1",
+                            "dataType": {
+                                "type": 10
+                            }
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 1 record retrieved in 1.351ms"
+                    },
+                    "totalRowCount": 1,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 0,
+                    "sql": "\nselect month(order_date) as month, avg(total_amount) as avg_order_value\nfrom Orders\nwhere total_amount >100 \ngroup by month(order_date)\nhaving Max(order_date) > DATE_ADD('2023-04-01', Interval -20 DAY) "
+                }
+            ]
+        },
+        {
+            "state": {
+                "start": 116,
+                "end": 116,
+                "language": "mysql",
+                "currentHeight": 180,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 0
+                        },
+                        "contentStart": 0,
+                        "state": 0
+                    }
+                ]
+            },
+            "data": []
+        }
+    ]
+}
